@@ -67,7 +67,7 @@ def hover(event):
         # place it at the position of the hovered scatter point
         ab.xy =(x[ind], y[ind])
         # set the image corresponding to that point
-        im.set_data(imgs[ind,:,:,:])
+        im.set_data(imgs[ind,:,:,:]) #if the dataset is too large to load into memory, can instead replace this command with a realtime load
     else:
         #if the mouse is not over a scatter point
         ab.set_visible(False)
