@@ -25,14 +25,17 @@ import numpy as np
 from io import BytesIO
 from tqdm import tqdm_notebook as tqdm
 import PIL.Image as Image
-# -
 
+# +
 # -- Set meta data which will appear on first slide
 title = "Epi/stroma segmentation"
 date = datetime.today()
 author = "Andrew Janowczyk"
 comments = "data and code taken from blog andrewjanowczyk.com "
 pptxfname = "epistroma_results.pptx"
+
+#we only want to generate output for images which have masks, so we find those files
+mask_files=glob.glob('./masks/*.png')
 
 # +
 #create presentation 
@@ -50,10 +53,6 @@ tf.text += f"Author: {author}\n"
 tf.text += f"Comments: {comments}\n"
 
 # -
-
-#we only want to generate output for images which have masks, so we find those files
-mask_files=glob.glob('./masks/*.png')
-
 
 #wrapper function to add an image as a byte stream to a slide
 #note that this is in place of having to save output directly to disk, and can be used in dynamic settings as well
