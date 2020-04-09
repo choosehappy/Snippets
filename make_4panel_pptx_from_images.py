@@ -23,7 +23,7 @@ import glob
 import cv2
 import numpy as np
 from io import BytesIO
-from tqdm import tqdm_notebook as tqdm
+from tqdm.autonotebook import tqdm
 import PIL.Image as Image
 
 # +
@@ -40,6 +40,8 @@ mask_files=glob.glob('./masks/*.png')
 # +
 #create presentation 
 prs = Presentation()
+prs.slide_width = Inches(10)
+prs.slide_height = Inches(10)
 
 blank_slide_layout = prs.slide_layouts[1]
 slide = prs.slides.add_slide(blank_slide_layout)
@@ -56,7 +58,7 @@ tf.text += f"Comments: {comments}\n"
 
 #wrapper function to add an image as a byte stream to a slide
 #note that this is in place of having to save output directly to disk, and can be used in dynamic settings as well
-def addimagetoslide(slide,img,left,top, height, width, resize = .1):
+def addimagetoslide(slide,img,left,top, height, width, resize = .5):
     res = cv2.resize(img , None, fx=resize,fy=resize ,interpolation=cv2.INTER_CUBIC) #since the images are going to be small, we can resize them to prevent the final pptx file from being large for no reason
     image_stream = BytesIO()
     Image.fromarray(res).save(image_stream,format="PNG")
@@ -110,14 +112,14 @@ for mask_fname in tqdm(mask_files):
     
     #------ Lastly we can also add some metrics/results/values if we would like
     # here we do simple FP/TP/TN/FN
-    txBox = slide.shapes.add_textbox(Inches(-4), Inches(0),Inches(4),Inches(4) )
+    txBox = slide.shapes.add_textbox(Inches(10), Inches(0),Inches(4),Inches(4) )
     tf = txBox.text_frame
     tf.text = f"{orig_fname}\n"
-    tf.text += f"Overall Pixel Agreement: {(output==mask).mean()}\n"
-    tf.text += f"True Positive Rate: {(mask[output>0]>0).sum()/(output>0).sum()}\n"
-    tf.text += f"False Positive Rate: {(mask[output==0]>0).sum()/(output==0).sum()}\n"
-    tf.text += f"True Negative Rate: {(mask[output==0]==0).sum()/(output==0).sum()}\n"
-    tf.text += f"False Negative Rate: {(mask[output>0]==0).sum()/(output>0).sum()}\n"
+    tf.text += f"Overall Pixel Agreement: {(output==mask).mean():.4f}\n"
+    tf.text += f"True Positive Rate: {(mask[output>0]>0).sum()/(output>0).sum():.4f}\n"
+    tf.text += f"False Positive Rate: {(mask[output==0]>0).sum()/(output==0).sum():.4f}\n"
+    tf.text += f"True Negative Rate: {(mask[output==0]==0).sum()/(output==0).sum():.4f}\n"
+    tf.text += f"False Negative Rate: {(mask[output>0]==0).sum()/(output>0).sum():.4f}\n"
     
     
 #At this point the pptx has not been saved, so we do that here and we're all done!
