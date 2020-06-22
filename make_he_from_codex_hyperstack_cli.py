@@ -72,7 +72,10 @@ for fname in files:
 
     hsv=cv2.cvtColor(a,cv2.COLOR_RGB2HSV)
     v = hsv[:,:,2]
-    hsv[:,:,2] = v + np.minimum(255 - v, 60)
+    # -- this assumes tma spots with white background, we aim to push the background brightness to white
+    qval = 255-np.quantile(v.reshape(-1),.90)
+    hsv[:,:,2] = v + np.minimum(255 - v, qval)
+    #hsv[:,:,2] = v+ (255-v.max())
     
 
     ab=cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
