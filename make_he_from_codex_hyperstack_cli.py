@@ -20,6 +20,7 @@ import glob
 import argparse
 from pathlib import Path
 import os
+from tqdm.autonotebook import tqdm
 
 # +
 parser = argparse.ArgumentParser(description='Make output for entire image using Unet')
@@ -43,7 +44,7 @@ if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 
 
-for fname in files:
+for fname in tqdm(files):
     fnameout=f"{Path(fname).stem}{args.suffix}{args.type if args.type[0] == '.' else '.'+args.type}"
     fnameout=Path(args.outdir,fnameout)
     
