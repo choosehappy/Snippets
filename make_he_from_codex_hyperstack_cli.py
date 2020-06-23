@@ -32,7 +32,6 @@ parser.add_argument('-f', '--force', help="force  output even if it exists", def
 
 args = parser.parse_args()
 
-args = parser.parse_args(["-f","-ttif","*.tif"])
 # -
 
 if len(args.input_pattern) > 1:  # bash has sent us a list of files
