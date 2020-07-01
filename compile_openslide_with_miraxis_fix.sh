@@ -1,3 +1,6 @@
+#start docker
+  docker run -it ubuntu:18.04 bash
+#--- run within docker
 apt update 
 apt install -y  libtiff-dev libxml2-dev libopenjp2-7-dev  libcairo2-dev libcairo2  libgdk-pixbuf2.0-dev  sqlite3 libsqlite3-dev  git wget nano build-essential autoconf automake libtool pkg-config  python3-pip
 cd / 
