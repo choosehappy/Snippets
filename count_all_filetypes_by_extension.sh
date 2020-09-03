@@ -1,0 +1,1 @@
+ find . -type f | sed -n 's/..*\.//p' | sort | uniq -c
