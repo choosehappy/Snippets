@@ -20,7 +20,8 @@ print(f"args: {args}")
 
 # +
 wsi_filename = args.wsi_name
-txt_filename = args.txt_name 
+txt_filename = args.txt_name
+wsi_file_suffix = os.path.splitext(wsi_filename)[1]
 tmaspot_size = args.tmaspotsize
 outdir = args.outdir
 
@@ -31,22 +32,41 @@ if not os.path.isdir(f"{outdir}"):
     os.mkdir(f"{outdir}")
 
 slide = openslide.OpenSlide(wsi_filename)
+
+bounds_x = float(slide.properties['openslide.bounds-x'])
+bounds_y = float(slide.properties['openslide.bounds-y'])
 ratio_x = 1.0/float(slide.properties['openslide.mpp-x'])
 ratio_y = 1.0/float(slide.properties['openslide.mpp-y'])
 
 dataset = np.loadtxt(txt_filename, dtype=str, skiprows=1)
 print(f"Number of rows in txt file ：{len(dataset)}")  #note that you aren't guanratted to get exactly this many spots out, simply because some may be set to false or are missing
 
-for row in tqdm(dataset):
-    fname,label,missing,x,y=row
-    if(not strtobool(missing)):
-        x = (float(x)*ratio_x)
-        y = (float(y)*ratio_y)
-        print(f"Extracting spot {label} at location", (x, y))
-        tmaspot = np.asarray(slide.read_region((int(x - tmaspot_size*0.5),int(y-tmaspot_size*0.5)), 0, (tmaspot_size, tmaspot_size)))[:, :, 0:3]
-        tmaspot = cv2.cvtColor(tmaspot,cv2.COLOR_RGB2BGR)
-        cv2.imwrite(f"{outdir}/{label}.png", tmaspot)
-    else:
-        print(f'The spot {label} is missing, skipping!')
+if (wsi_file_suffix =='.MRXS'):
+    for row in tqdm(dataset):
+        fname, label, missing, x, y = row
+        if (not strtobool(missing)):
+            x = (float(x) * ratio_x) + bounds_x
+            y = (float(y) * ratio_y) + bounds_y
+            print(f"Extracting spot {label} at location", (x, y))
+            tmaspot = np.asarray(slide.read_region((int(x - tmaspot_size * 0.5), int(y - tmaspot_size * 0.5)), 0,
+                                                   (tmaspot_size, tmaspot_size)))[:, :, 0:3]
+            tmaspot = cv2.cvtColor(tmaspot, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(f"{outdir}/{label}.png", tmaspot)
+        else:
+            print(f'The spot {label} is missing, skipping!')
+
+else:
+    for row in tqdm(dataset):
+        fname, label, missing, x, y = row
+        if (not strtobool(missing)):
+            x = (float(x) * ratio_x)
+            y = (float(y) * ratio_y)
+            print(f"Extracting spot {label} at location", (x, y))
+            tmaspot = np.asarray(slide.read_region((int(x - tmaspot_size * 0.5), int(y - tmaspot_size * 0.5)), 0,
+                                                   (tmaspot_size, tmaspot_size)))[:, :, 0:3]
+            tmaspot = cv2.cvtColor(tmaspot, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(f"{outdir}/{label}.png", tmaspot)
+        else:
+            print(f'The spot {label} is missing, skipping!')
 
 print('Extracted all the spots!')
