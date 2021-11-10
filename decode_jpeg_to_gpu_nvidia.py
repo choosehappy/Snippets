@@ -67,7 +67,8 @@ at = torchvision.io.decode_jpeg(data, device=device)
 
 a=np.random.uniform(low=0,high=255,size=(10000,10000,3)).astype(np.uint8)
 
-cv2.imwrite('output.jpg',a) ## produces a 111MB file
+cv2.imwrite('output.jpg',a)## produces a 111MB file
+cv2.imwrite('output_high.jpg',a,[int(cv2.IMWRITE_JPEG_QUALITY), 80])## produces a 64MB file
 
 # %%timeit
 data=cv2.imread('output.jpg')
@@ -76,3 +77,13 @@ at=torch.from_numpy(data).to(device)
 # %%timeit
 data=torchvision.io.read_file("output.jpg")
 img = torchvision.io.decode_jpeg(data, device=device)
+
+
+# %%timeit
+data=cv2.imread('output_high.jpg')
+at=torch.from_numpy(data).to(device)
+
+# %%timeit
+data=torchvision.io.read_file("output_high.jpg")
+img = torchvision.io.decode_jpeg(data, device=device)
+
