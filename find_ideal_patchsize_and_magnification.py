@@ -13,6 +13,9 @@
 #     name: conda-env-Pytorch-py
 # ---
 
+# blogpost - http://andrewjanowczyk.com/how-to-select-the-correct-magnification-for-digital-pathology-projects/
+# Written by Kien Rea - kar145@case.edu, kienarea@gmail.com 2022
+
 # +
 import skimage
 import tables
@@ -160,7 +163,6 @@ plt.title("Normal Axis Lengths")
 plt.show()
 
 # Print the number of patches that will be cut off at each patch size
-#patchsizes = [x[0] for x in mark_patchsizes]
 mark_patchsizes.sort()
 for dim,_ in mark_patchsizes:
     i = len(rect_final[rect_final<=dim])
@@ -216,45 +218,3 @@ for i,(ps,_) in enumerate(mark_patchsizes):
 
 plt.show()
 # -
-
-a = plt.figure(figsize=(10,5))
-half_patch_size = 128
-#index = random.randint(0, len(files))
-index = 118
-image1 = cv2.cvtColor(cv2.imread(files[index][0]),cv2.COLOR_BGR2RGB)
-resize = .25
-image2 = cv2.resize(image1, (int(image.shape[1]*resize), int(image.shape[0]*resize)),interpolation = cv2.INTER_NEAREST)
-dx = (int(centroids_final[index][0] - half_patch_size),int(centroids_final[index][0] + half_patch_size))
-dy = (int(centroids_final[index][1] - half_patch_size),int(centroids_final[index][1] + half_patch_size))
-patch1 = image1[dx[0]:dx[1], dy[0]:dy[1]]
-#dx = (int(centroids_final[index][0]//2 - half_patch_size),int(centroids_final[index][0]//2 + half_patch_size))
-#dy = (int(centroids_final[index][1]//2 - half_patch_size),int(centroids_final[index][1]//2 + half_patch_size))
-patch2 = image2[dx[0]//4:dx[1]//4, dy[0]//4:dy[1]//4]
-ax = plt.subplot2grid((1,2), (0, 0))
-ax.set_title("256px by 256px (40x)")
-plt.imshow(patch1)
-ax = plt.subplot2grid((1,2), (0, 1))
-ax.set_title("64px by 64px (10x)")
-plt.imshow(patch2)
-
-a = plt.figure(figsize=(10,5))
-half_patch_size = 128
-#index = random.randint(0, len(files))
-index = 118
-image1 = cv2.cvtColor(cv2.imread(files[index][0]),cv2.COLOR_BGR2RGB)
-resize = .5
-image2 = cv2.resize(image1, (int(image.shape[1]*resize), int(image.shape[0]*resize)),interpolation = cv2.INTER_NEAREST)
-dx = (int(centroids_final[index][0] - half_patch_size),int(centroids_final[index][0] + half_patch_size))
-dy = (int(centroids_final[index][1] - half_patch_size),int(centroids_final[index][1] + half_patch_size))
-patch1 = image1[dx[0]:dx[1], dy[0]:dy[1]]
-dx = (int(centroids_final[index][0]//2 - half_patch_size),int(centroids_final[index][0]//2 + half_patch_size))
-dy = (int(centroids_final[index][1]//2 - half_patch_size),int(centroids_final[index][1]//2 + half_patch_size))
-patch2 = image2[dx[0]:dx[1], dy[0]:dy[1]]
-ax = plt.subplot2grid((1,2), (0, 0))
-ax.set_title("40x")
-plt.imshow(patch1)
-ax = plt.subplot2grid((1,2), (0, 1))
-ax.set_title("20x")
-plt.imshow(patch2)
-
-
