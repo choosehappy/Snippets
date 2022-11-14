@@ -63,14 +63,6 @@ def addimagetoslide(slide,image_stream,left,top, height, width, resize = 1.0, co
 	tf = txBox.text_frame
 	tf.text = comment
 
-def cartesian_product(*arrays):
-	la = len(arrays)
-	dtype = np.result_type(*arrays)
-	arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
-	for i, a in enumerate(np.ix_(*arrays)):
-		arr[...,i] = a
-	return arr.reshape(-1, la)
-
 def generate_powerpoint(h5_path, model, pptx_save_path, img_transform, device, criteria_dict:dict):
 	dset = Dataset(h5_path, img_transform)
 	dloader = DataLoader(dset, batch_size=1, 
@@ -107,7 +99,8 @@ def generate_powerpoint(h5_path, model, pptx_save_path, img_transform, device, c
 		print(gts.shape)
 
 	ppt = Presentation()
-	cartesian_coords = cartesian_product(np.arange(5), np.arange(8))	# generate coordinates for the image grid
+	grid = np.meshgrid(np.arange(5), np.arange(8), indexing='ij')
+	cartesian_coords = zip(grid[0].flatten(), grid[1].flatten())
 
 	slidenames = criteria_dict.keys()
 	for slidename in slidenames:
