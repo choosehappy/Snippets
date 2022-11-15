@@ -67,7 +67,13 @@ img=osh.read_region((60000,60000),0,(2000,2000)).convert("RGB")
 #create a profile for RGB 
 rgbp=ImageCms.createProfile("sRGB")
 #and build a transform to for our RGB to ICC space, so that we can apply it faster later
-icc2rgb = ImageCms.buildTransformFromOpenProfiles(rgbp, prf, "RGB", "RGB")
+#Update Nov2022, it was pointed out to me that the previous version of this code had the two profiles switched
+#however when I tested both versions, the 'swapped' version appeared to result in a better colored image
+#practically speaking, I'm unsure what to make of that...i leave it to the user to decide is it better for it to be correct or for it to look nicer?
+#experiments to be done....
+
+#icc2rgb = ImageCms.buildTransformFromOpenProfiles(rgbp, prf, "RGB", "RGB") #inverted version
+icc2rgb = ImageCms.buildTransformFromOpenProfiles(prf,rgbp, "RGB", "RGB")   #correct version
 
 # #%%timeit
 #apply the transform, we can uncomment the previous timeit line to understand how fast tihs occurs, should be about 95ms on a relatively old laptop
