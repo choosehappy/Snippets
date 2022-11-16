@@ -1,11 +1,8 @@
 import argparse
-import glob
-import os
 from PIL import Image
 import numpy as np
 from pptx import Presentation
 from pptx.util import Inches
-import cv2
 from io import BytesIO
 from tqdm.autonotebook import tqdm
 from torch.utils.data import DataLoader
@@ -82,7 +79,7 @@ def generate_powerpoint(h5_path, model, pptx_save_path, img_transform, device, c
 			predictions.append(predflat)
 			
 
-		# TODO something wrong here
+		
 		with tables.open_file(h5_path, 'a') as f:
 			try:
 				predictions_dataset = f.create_carray(f.root, "predictions", img_dtype, np.array(predictions).shape)
