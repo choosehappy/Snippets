@@ -1,12 +1,7 @@
 import argparse
-from PIL import Image
 import numpy as np
-from pptx import Presentation
-from pptx.util import Inches
-from io import BytesIO
 from tqdm.autonotebook import tqdm
 from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
 from torchvision.models import DenseNet
 from albumentations import *
 from albumentations.pytorch import ToTensor

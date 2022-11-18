@@ -5,7 +5,6 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 from tqdm.autonotebook import tqdm
-from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import tables
 
