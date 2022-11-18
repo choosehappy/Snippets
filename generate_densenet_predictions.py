@@ -65,13 +65,13 @@ if __name__ == '__main__':
 	device = torch.device(f'cuda:{args.gpuid}' if torch.cuda.is_available() else 'cpu')
 
 	# compose image transforms
-	img_transform = Compose([	# we choose not to apply any image transforms.
+	img_transform = Compose([
 		# VerticalFlip(p=.5),
 		# HorizontalFlip(p=.5),
 		# HueSaturationValue(hue_shift_limit=(-25,0),sat_shift_limit=0,val_shift_limit=0,p=1),
 		# Rotate(p=1, border_mode=cv2.BORDER_CONSTANT,value=0),
-		RandomSizedCrop((args.patch_size,args.patch_size), args.patch_size,args.patch_size),
-		# CenterCrop(args.patch_size,args.patch_size),
+		# RandomSizedCrop((args.patch_size,args.patch_size), args.patch_size,args.patch_size),
+		CenterCrop(args.patch_size,args.patch_size),
 		ToTensor()
 	])
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 								shuffle=True, num_workers=8,pin_memory=True)
 
 
-	# densenet structure params taken from:
+	# densenet structure params copied from:
 	# https://github.com/choosehappy/PytorchDigitalPathology/blob/master/classification_lymphoma_densenet/train_densenet_albumentations.py
 	num_classes=3    #number of classes in the data mask that we'll aim to predict
 	in_channels= 3  #input channel of the data, RGB = 3
