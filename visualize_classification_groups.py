@@ -19,7 +19,7 @@ def addimagetoslide(slide,image_stream,left,top, height, width, resize = 1.0, co
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('h5path', type=str, help='The path to an h5 file that contains "patch", "ground_truth_label", and "fname" datasets.')	
+	parser.add_argument('pytable_path', type=str, help='The path to an h5 file that contains "patch", "ground_truth_label", and "fname" datasets.')	
 	parser.add_argument('ppt_save', type=str, help='The full path to save the generated powerpoint.')
 
 	parser.add_argument('--str_criteria', '-s', default=["TRUE NEGATIVES", "FALSE NEGATIVES", "FALSE POSITIVES", "TRUE POSITIVES"], type=str, nargs="+")
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 		criteria_dict[str_criteria] = criteria
 
 	# get predictions and ground truths
-	with tables.open_file(args.h5path, 'r') as f:
+	with tables.open_file(args.pytable_path, 'r') as f:
 		gts = np.array(f.root.labels[:]).flatten()
 		preds = np.array(f.root.predictions[:]).flatten()
 		print(gts.shape)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 		for j, ind in tqdm(enumerate(selected_inds)):
 			coord = cartesian_coords[j]
 
-			with tables.open_file(args.h5path, 'r') as f:	# we need to get the image_filename manually.
+			with tables.open_file(args.pytable_path, 'r') as f:	# we need to get the image_filename manually.
 				img_filename = f.root.filenames[ind]
 				label = f.root.labels[ind]
 				img = f.root.imgs[ind, :, :, :]

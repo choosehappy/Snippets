@@ -48,7 +48,7 @@ class Dataset(object):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('h5path', type=str, help='The path to an h5 file that contains "patch", "ground_truth_label", and "fname" datasets.')	
+	parser.add_argument('pytable_path', type=str, help='The path to an h5 file that contains "patch", "ground_truth_label", and "fname" datasets.')	
 	parser.add_argument('model_checkpoint', type=str, default=None, help='The path to a model checkpoint for the torch.load() method.')
 	parser.add_argument('--patch_size', type=int, default=224, help='The width of a square patch.')
 	parser.add_argument('--gpuid', type=int, default=0, help='The device id.')
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 	])
 
 	# initialize dataset and dataloader
-	dset = Dataset(args.h5path, img_transform)
+	dset = Dataset(args.pytable_path, img_transform)
 	dloader = DataLoader(dset, batch_size=1, 
 								shuffle=True, num_workers=8,pin_memory=True)
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
 		predictions.append(predflat)
 		
 	# save predictions to h5
-	with tables.open_file(args.h5path, 'a') as f:
+	with tables.open_file(args.pytable_path, 'a') as f:
 		try:
 			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
 		except:
@@ -120,6 +120,6 @@ if __name__ == '__main__':
 
 		predictions_dataset[:] = predictions
 	
-	print(f'Predictions have been saved to {args.h5path}')
+	print(f'Predictions have been saved to {args.pytable_path}')
 
 	
