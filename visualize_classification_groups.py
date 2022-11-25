@@ -28,11 +28,8 @@ if __name__ == "__main__":
 	
 
 	##### INITIALIZE CRITERIA DICT #####
-	criteria_dict = {}
-	for idx in range(len(args.str_criteria)):
-		str_criteria = args.str_criteria[idx]
-		criteria = [int(item) for item in list(args.criteria[idx])]		# parse criteria into a grid coordinate (e.g. [0,0])
-		criteria_dict[str_criteria] = criteria
+	criteria_dict = {args.str_criteria[i]: [int(j) for j in args.criteria[i]] for i in range(len(args.str_criteria))}
+
 
 	# get predictions and ground truths
 	with tables.open_file(args.pytable_path, 'r') as f:

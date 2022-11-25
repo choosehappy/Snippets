@@ -113,10 +113,10 @@ if __name__ == '__main__':
 		
 	# save predictions to h5
 	with tables.open_file(args.pytable_path, 'a') as f:
-		try:
-			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
-		except:
+		if 'predictions' in f.root:
 			predictions_dataset = f.root.predictions
+		else:
+			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
 
 		predictions_dataset[:] = predictions
 	
