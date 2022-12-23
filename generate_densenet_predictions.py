@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# blogpost - http://www.andrewjanowczyk.com/?p=1661
+# Written by Jackson Jacobs - jjj72@case.edu, 2022
+
 import argparse
 import numpy as np
 from tqdm.autonotebook import tqdm
@@ -16,7 +20,7 @@ class Dataset(object):
 		self.img_transform=img_transform
 		
 		with tables.open_file(self.fname,'r') as db:
-			self.classsizes=db.root.classsizes[:]
+			# self.classsizes=db.root.classsizes[:]
 			self.nitems=db.root.imgs.shape[0]
 		
 		self.imgs = None
@@ -76,25 +80,16 @@ if __name__ == '__main__':
 								shuffle=True, num_workers=8,pin_memory=True)
 
 
-	# densenet structure params copied from:
-	# https://github.com/choosehappy/PytorchDigitalPathology/blob/master/classification_lymphoma_densenet/train_densenet_albumentations.py
-	num_classes=3    #number of classes in the data mask that we'll aim to predict
-	in_channels= 3  #input channel of the data, RGB = 3
-
-	growth_rate=32 
-	block_config=(2, 2, 2, 2)
-	num_init_features=64
-	bn_size=4
-	drop_rate=0
-
 	# initialize DenseNet model
-	model = DenseNet(growth_rate=growth_rate, block_config=block_config,
-					num_init_features=num_init_features, 
-					bn_size=bn_size, 
-					drop_rate=drop_rate, 
-					num_classes=num_classes).to(device)
-
 	checkpoint = torch.load(args.model_checkpoint)
+	model = DenseNet(growth_rate=checkpoint['growth_rate'], 
+					block_config=checkpoint['block_config'],
+					num_init_features=checkpoint['num_init_features'], 
+					bn_size=checkpoint['bn_size'], 
+					drop_rate=checkpoint['drop_rate'], 
+					num_classes=checkpoint['num_classes']).to(device)
+
+	
 	model.load_state_dict(checkpoint["model_dict"])
 	model.eval()
 	model.to(device)
@@ -114,11 +109,10 @@ if __name__ == '__main__':
 	# save predictions to h5
 	with tables.open_file(args.pytable_path, 'a') as f:
 		if 'predictions' in f.root:
-			predictions_dataset = f.root.predictions
+			print(f"Predictions key already exists in {args.pytable_path}")
 		else:
-			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
+			f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
 
-		predictions_dataset[:] = predictions
 	
 	print(f'Predictions have been saved to {args.pytable_path}')
 
