@@ -111,10 +111,8 @@ if __name__ == '__main__':
 		if 'predictions' in f.root:
 			print(f"Predictions key already exists in {args.pytable_path}")
 		else:
-			# f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
 			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
 			predictions_dataset[:] = predictions
-	
-	print(f'Predictions have been saved to {args.pytable_path}')
+			print(f'Predictions have been saved to {args.pytable_path}')
 
 	
