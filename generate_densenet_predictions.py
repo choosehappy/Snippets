@@ -52,11 +52,18 @@ class Dataset(object):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('pytable_path', type=str, help='The path to an h5 file that contains "patch", "ground_truth_label", and "fname" datasets.')	
+	parser.add_argument('pytable_path', type=str, help='The path to a .pytable file that contains "patch", "ground_truth_label", and "fname" datasets.')	
 	parser.add_argument('model_checkpoint', type=str, default=None, help='The path to a model checkpoint for the torch.load() method.')
 	parser.add_argument('--patch_size', type=int, default=224, help='The width of a square patch.')
 	parser.add_argument('--gpuid', type=int, default=0, help='The device id.')
 	args = parser.parse_args()
+
+	# check h5 file for "predictions" dataset
+	preds_exists = False
+	with tables.open_file(args.pytable_path, 'r') as f:
+		if 'predictions' in f.root:
+			preds_exists = True
+			input(f'{args.pytable_path} already contains a "predictions" dataset.\nPress [ENTER] to overwrite the existing dataset, or ctrl+C to safely kill this script.')
 
 	# set device 
 	print(torch.cuda.get_device_properties(args.gpuid))
@@ -108,11 +115,11 @@ if __name__ == '__main__':
 		
 	# save predictions to h5
 	with tables.open_file(args.pytable_path, 'a') as f:
-		if 'predictions' in f.root:
-			print(f"Predictions key already exists in {args.pytable_path}")
-		else:
-			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
-			predictions_dataset[:] = predictions
-			print(f'Predictions have been saved to {args.pytable_path}')
+		if preds_exists:	# remove the current predictions dataset and start fresh, in case the number of predictions has changed.
+			f.root.predictions.remove()		
+		
+		f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
+		f.root.predictions[:] = predictions
+		print(f'Predictions have been saved to {args.pytable_path}')
 
 	
