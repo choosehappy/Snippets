@@ -59,10 +59,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# check h5 file for "predictions" dataset
-	preds_exists = False
 	with tables.open_file(args.pytable_path, 'r') as f:
 		if 'predictions' in f.root:
-			preds_exists = True
 			input(f'{args.pytable_path} already contains a "predictions" dataset.\nPress [ENTER] to overwrite the existing dataset, or ctrl+C to safely kill this script.')
 
 	# set device 
@@ -115,7 +113,7 @@ if __name__ == '__main__':
 		
 	# save predictions to h5
 	with tables.open_file(args.pytable_path, 'a') as f:
-		if preds_exists:	# remove the current predictions dataset and start fresh, in case the number of predictions has changed.
+		if 'predictions' in f.root:	# remove the current predictions dataset and start fresh, in case the number of predictions has changed.
 			f.root.predictions.remove()		
 		
 		f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
