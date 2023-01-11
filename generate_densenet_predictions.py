@@ -81,8 +81,8 @@ if __name__ == '__main__':
 
 	# initialize dataset and dataloader
 	dset = Dataset(args.pytable_path, img_transform)
-	dloader = DataLoader(dset, batch_size=1, 
-								shuffle=True, num_workers=8,pin_memory=True)
+	dloader = DataLoader(dset, batch_size=16, 
+								shuffle=False, num_workers=8,pin_memory=True)
 
 
 	# initialize DenseNet model
@@ -109,12 +109,12 @@ if __name__ == '__main__':
 		pred = model(img)
 		p=pred.detach().cpu().numpy()
 		predflat=np.argmax(p,axis=1).flatten()
-		predictions.append(predflat)
+		predictions.extend(predflat)
 		
 	# save predictions to h5
 	with tables.open_file(args.pytable_path, 'a') as f:
 		if 'predictions' in f.root:	# remove the current predictions dataset and start fresh, in case the number of predictions has changed.
-			f.root.predictions.remove()		
+			f.root.predictions.remove()
 		
 		f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
 		f.root.predictions[:] = predictions
