@@ -56,6 +56,7 @@ if __name__ == '__main__':
 	parser.add_argument('model_checkpoint', type=str, default=None, help='The path to a model checkpoint for the torch.load() method.')
 	parser.add_argument('--patch_size', type=int, default=224, help='The width of a square patch.')
 	parser.add_argument('--gpuid', type=int, default=0, help='The device id.')
+	parser.add_argument('--batch_size', type=int, default=32, help='The batch size for generating predictions.')
 	args = parser.parse_args()
 
 	# check h5 file for "predictions" dataset
@@ -81,7 +82,7 @@ if __name__ == '__main__':
 
 	# initialize dataset and dataloader
 	dset = Dataset(args.pytable_path, img_transform)
-	dloader = DataLoader(dset, batch_size=16, 
+	dloader = DataLoader(dset, batch_size=args.batch_size, 
 								shuffle=False, num_workers=8,pin_memory=True)
 
 
