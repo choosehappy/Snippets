@@ -53,7 +53,7 @@ class Dataset(object):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('pytable_path', type=str, help='The path to a .pytable file that contains "patch", "ground_truth_label", and "fname" datasets.')	
-	parser.add_argument('model_checkpoint', type=str, default=None, help='The path to a model checkpoint for the torch.load() method.')
+	parser.add_argument('model_checkpoint', type=str, help='The path to a model checkpoint for the torch.load() method.')
 	parser.add_argument('--patch_size', type=int, default=224, help='The width of a square patch.')
 	parser.add_argument('--gpuid', type=int, default=0, help='The device id.')
 	parser.add_argument('--batch_size', type=int, default=32, help='The batch size for generating predictions.')
