@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# blogpost - http://www.andrewjanowczyk.com/?p=1661
+# Written by Jackson Jacobs - jjj72@case.edu, 2022
+
 import argparse
 import numpy as np
 from tqdm.autonotebook import tqdm
@@ -16,7 +20,7 @@ class Dataset(object):
 		self.img_transform=img_transform
 		
 		with tables.open_file(self.fname,'r') as db:
-			self.classsizes=db.root.classsizes[:]
+			# self.classsizes=db.root.classsizes[:]
 			self.nitems=db.root.imgs.shape[0]
 		
 		self.imgs = None
@@ -48,11 +52,17 @@ class Dataset(object):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('pytable_path', type=str, help='The path to an h5 file that contains "patch", "ground_truth_label", and "fname" datasets.')	
-	parser.add_argument('model_checkpoint', type=str, default=None, help='The path to a model checkpoint for the torch.load() method.')
+	parser.add_argument('pytable_path', type=str, help='The path to a .pytable file that contains "patch", "ground_truth_label", and "fname" datasets.')	
+	parser.add_argument('model_checkpoint', type=str, help='The path to a model checkpoint for the torch.load() method.')
 	parser.add_argument('--patch_size', type=int, default=224, help='The width of a square patch.')
 	parser.add_argument('--gpuid', type=int, default=0, help='The device id.')
+	parser.add_argument('--batch_size', type=int, default=32, help='The batch size for generating predictions.')
 	args = parser.parse_args()
+
+	# check h5 file for "predictions" dataset
+	with tables.open_file(args.pytable_path, 'r') as f:
+		if 'predictions' in f.root:
+			input(f'{args.pytable_path} already contains a "predictions" dataset.\nPress [ENTER] to overwrite the existing dataset, or ctrl+C to safely kill this script.')
 
 	# set device 
 	print(torch.cuda.get_device_properties(args.gpuid))
@@ -72,29 +82,20 @@ if __name__ == '__main__':
 
 	# initialize dataset and dataloader
 	dset = Dataset(args.pytable_path, img_transform)
-	dloader = DataLoader(dset, batch_size=1, 
-								shuffle=True, num_workers=8,pin_memory=True)
+	dloader = DataLoader(dset, batch_size=args.batch_size, 
+								shuffle=False, num_workers=8,pin_memory=True)
 
-
-	# densenet structure params copied from:
-	# https://github.com/choosehappy/PytorchDigitalPathology/blob/master/classification_lymphoma_densenet/train_densenet_albumentations.py
-	num_classes=3    #number of classes in the data mask that we'll aim to predict
-	in_channels= 3  #input channel of the data, RGB = 3
-
-	growth_rate=32 
-	block_config=(2, 2, 2, 2)
-	num_init_features=64
-	bn_size=4
-	drop_rate=0
 
 	# initialize DenseNet model
-	model = DenseNet(growth_rate=growth_rate, block_config=block_config,
-					num_init_features=num_init_features, 
-					bn_size=bn_size, 
-					drop_rate=drop_rate, 
-					num_classes=num_classes).to(device)
-
 	checkpoint = torch.load(args.model_checkpoint)
+	model = DenseNet(growth_rate=checkpoint['growth_rate'], 
+					block_config=checkpoint['block_config'],
+					num_init_features=checkpoint['num_init_features'], 
+					bn_size=checkpoint['bn_size'], 
+					drop_rate=checkpoint['drop_rate'], 
+					num_classes=checkpoint['num_classes']).to(device)
+
+	
 	model.load_state_dict(checkpoint["model_dict"])
 	model.eval()
 	model.to(device)
@@ -109,17 +110,15 @@ if __name__ == '__main__':
 		pred = model(img)
 		p=pred.detach().cpu().numpy()
 		predflat=np.argmax(p,axis=1).flatten()
-		predictions.append(predflat)
+		predictions.extend(predflat)
 		
 	# save predictions to h5
 	with tables.open_file(args.pytable_path, 'a') as f:
-		if 'predictions' in f.root:
-			predictions_dataset = f.root.predictions
-		else:
-			predictions_dataset = f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
-
-		predictions_dataset[:] = predictions
-	
-	print(f'Predictions have been saved to {args.pytable_path}')
+		if 'predictions' in f.root:	# remove the current predictions dataset and start fresh, in case the number of predictions has changed.
+			f.root.predictions.remove()
+		
+		f.create_carray(f.root, "predictions", dtype, np.array(predictions).shape)
+		f.root.predictions[:] = predictions
+		print(f'Predictions have been saved to {args.pytable_path}')
 
 	

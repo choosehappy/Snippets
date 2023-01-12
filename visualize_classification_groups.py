@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# blogpost - http://www.andrewjanowczyk.com/?p=1661
+# Written by Jackson Jacobs - jjj72@case.edu, 2022
+
 import argparse
 from PIL import Image
 import numpy as np
@@ -9,9 +13,6 @@ import matplotlib.pyplot as plt
 import tables
 
 def addimagetoslide(slide,image_stream,left,top, height, width, resize = 1.0, comment = ''):
-	# res = cv2.resize(img , None, fx=resize,fy=resize ,interpolation=cv2.INTER_CUBIC) #since the images are going to be small, we can resize them to prevent the final pptx file from being large for no reason
-	# image_stream = BytesIO()
-	# Image.fromarray(res).save(image_stream,format="PNG")
 	slide.shapes.add_picture(image_stream, left, top ,height,width)
 	txBox = slide.shapes.add_textbox(left, Inches(1), width, height)
 	tf = txBox.text_frame
@@ -24,6 +25,8 @@ if __name__ == "__main__":
 
 	parser.add_argument('--str_criteria', '-s', default=["TRUE NEGATIVES", "FALSE NEGATIVES", "FALSE POSITIVES", "TRUE POSITIVES"], type=str, nargs="+")
 	parser.add_argument('--criteria', default=['00', '10', '01', '11'], type=str, nargs="+", help="Each item is a pair of ground-truth,prediction labels.")
+	parser.add_argument('--num_rows', '-r',default=5, type=int, help="The number of rows of images per slide.")
+	parser.add_argument('--num_cols', '-c',default=8, type=int, help="The number of columns of images per slide.")
 	args = parser.parse_args()
 	
 
@@ -39,8 +42,8 @@ if __name__ == "__main__":
 	
 	# init presentation and compute coordinate grid.
 	ppt = Presentation()
-	grid_width = 8
-	grid_height = 5
+	grid_width = args.num_cols
+	grid_height = args.num_rows
 	grid = np.mgrid[0:grid_height, 0:grid_width]
 	cartesian_coords = np.vstack([grid[0].ravel(), grid[1].ravel()]).T
 	print(cartesian_coords)
@@ -72,7 +75,8 @@ if __name__ == "__main__":
 				img = f.root.imgs[ind, :, :, :]
 
 			plt.imshow(img)
-			plt.title(img_filename.decode("utf-8").split('/')[-1])
+			title = img_filename.decode("utf-8").split('/')[-1]
+			plt.title(title, wrap=True)
 			plt.tick_params(color='b',bottom=False, left=False)
 			plt.xticks([])
 			plt.yticks([])
@@ -80,7 +84,12 @@ if __name__ == "__main__":
 				plt.savefig(img_buf, format='png', bbox_inches='tight')
 				plt.close()
 				im = Image.open(img_buf)
-				addimagetoslide(slide, img_buf, top=Inches(coord[0]*1.2+1),left=Inches(coord[1]*1.2 + 0.25), width=Inches(im.height/im.width), height=Inches(1))
+				addimagetoslide(slide, 
+								img_buf, 
+								top=Inches(coord[0]*1.2+1),
+								left=Inches(coord[1]*1.2 + 0.25), 
+								width=Inches(im.height/im.width), 
+								height=Inches(1))
 				im.close()
 
 	ppt.save(args.ppt_save)
