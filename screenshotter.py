@@ -35,7 +35,6 @@ class ScreenshotApp:
         
         # Screenshot variables
         self.running = True
-        self.active = True  # True = active (red), False = inactive (black)
         self.screenshot_thread = None
         
         # Start screenshot thread
@@ -85,7 +84,7 @@ class ScreenshotApp:
             
             # Show green circle for 1 second
             self.set_circle_color("green")
-            self.root.after(1000, lambda: self.set_circle_color("red" if self.active else "black"))
+            self.root.after(1000, lambda: self.set_circle_color("red" if self.running else "blue"))
             
         except Exception as e:
             print(f"Error taking screenshot: {e}")
@@ -102,6 +101,7 @@ class ScreenshotApp:
     
     def start_screenshot_thread(self):
         """Start the background screenshot thread"""
+        self.running = True
         self.screenshot_thread = threading.Thread(target=self.screenshot_loop, daemon=True)
         self.screenshot_thread.start()
         self.circle = self.canvas.create_oval(5, 5, 25, 25, fill="red", outline="")
